@@ -1,0 +1,17 @@
+{
+  "name": "linkhub",
+  "version": "1.0.0",
+  "description": "A simple GraphQL server",
+  "main": "server.js",
+  "scripts": {
+    "start": "set node_env=production&&node ./server.js",
+    "dstart": "set NODE_ENV=development&&node ./server.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.16.2",
+    "postgraphile-plugin-connection-filter": "^1.0.0-alpha.2",
+    "postgraphql": "3.5.6"
+  }
+}
