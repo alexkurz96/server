@@ -107,7 +107,7 @@ CREATE INDEX link_fts_idx ON link USING GIN (to_tsvector('russian', title || ' '
 CREATE FUNCTION search_link(search TEXT) RETURNS SETOF link AS $$
   SELECT *
   FROM link
-  WHERE to_tsvector('russian', title || ' ' || preview) @@ plainto_tsquery('russian', search)
+  WHERE  search = '' or to_tsvector('russian', title || ' ' || preview) @@ plainto_tsquery('russian', search)
 $$ LANGUAGE SQL STABLE;
 
 COMMENT ON FUNCTION search_link(TEXT) IS 'Поиск по заголовку и превью ссылки';
