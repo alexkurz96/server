@@ -2,7 +2,7 @@ const express = require('express')
 const { postgraphql } = require('postgraphql')
 const PostGraphileConnectionFilterPlugin = require('postgraphile-plugin-connection-filter')
 
-const {user, password} = require('./creditional.json')
+const { user, password } = require('./creditional.json')
 
 const app = express()
 console.log(process.env.NODE_ENV)
@@ -26,7 +26,8 @@ const pgql_options = {
   pgDefaultRole: 'anonymous',
   jwtSecret: 'r3QkeL2OwKIPJxwZ',
   jwtPgTypeIdentifier: 'main.jwt_token',
-  appendPlugins: [PostGraphileConnectionFilterPlugin]
+  appendPlugins: [PostGraphileConnectionFilterPlugin],
+  enableCors: true
 }
 
 app.use(postgraphql(pgql_config, pgql_schemas, pgql_options))
