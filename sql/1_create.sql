@@ -166,7 +166,7 @@ GRANT UPDATE, DELETE ON TABLE person TO authorized, admin;
 
 ----------------------------------------
 CREATE FUNCTION person_full_name(person person) RETURNS TEXT AS $$
-  SELECT person.first_name || ' ' || person.last_name
+  SELECT COALESCE(person.first_name, '') || ' ' || COALESCE(person.last_name,'')
 $$ LANGUAGE SQL STABLE;
 
 COMMENT ON FUNCTION person_full_name(person) IS 'Полное имя пользователя = Фамилия + Имя';
