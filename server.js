@@ -1,5 +1,5 @@
 const express = require('express')
-const { postgraphql } = require('postgraphql')
+const { postgraphile } = require('postgraphile')
 const PostGraphileConnectionFilterPlugin = require('postgraphile-plugin-connection-filter')
 
 const { user, password } = require('./creditional.json')
@@ -30,7 +30,7 @@ const pgql_options = {
   enableCors: true
 }
 
-app.use(postgraphql(pgql_config, pgql_schemas, pgql_options))
+app.use(postgraphile(pgql_config, pgql_schemas, pgql_options))
 
 app.listen(PORT, () =>
   console.log(`GraphQL Server is now running on http://localhost:${PORT}`)
