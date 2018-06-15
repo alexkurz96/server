@@ -107,8 +107,10 @@ CREATE INDEX link_fts_idx ON link USING GIN (to_tsvector('russian', title || ' '
 CREATE FUNCTION search_link(search TEXT) RETURNS SETOF link AS $$
   SELECT *
   FROM link
-  WHERE  search = '' or to_tsvector('russian', title || ' ' || preview) @@ plainto_tsquery('russian', search)
+  WHERE  search = '' or to_tsvector('russian', title || ' ' || COALESCE(preview, '')) @@ plainto_tsquery('russian', search)
 $$ LANGUAGE SQL STABLE;
+
+
 
 COMMENT ON FUNCTION search_link(TEXT) IS 'Поиск по заголовку и превью ссылки';
 GRANT EXECUTE ON FUNCTION search_link(TEXT) TO anonymous, authorized, admin;
@@ -163,6 +165,11 @@ COMMENT ON COLUMN person.created_at IS 'Время создания физлиц
 
 GRANT SELECT ON TABLE person TO anonymous, authorized, admin;
 GRANT UPDATE, DELETE ON TABLE person TO authorized, admin;
+
+CREATE FUNCTION search_link_tag(search_id INTEGER, search TEXT) RETURNS SETOF link AS $$
+  SELECT * from search_link(search) 
+  WHERE id in (select link_id from link_tag where tag_id = search_id)
+$$ LANGUAGE SQL STABLE;
 
 ----------------------------------------
 CREATE FUNCTION person_full_name(person person) RETURNS TEXT AS $$
