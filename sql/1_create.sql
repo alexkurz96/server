@@ -108,9 +108,12 @@ CREATE FUNCTION search_link(search TEXT) RETURNS SETOF link AS $$
   SELECT *
   FROM link
   WHERE  search = '' or to_tsvector('russian', title || ' ' || COALESCE(preview, '')) @@ plainto_tsquery('russian', search)
+  ORDER BY created_at DESC
 $$ LANGUAGE SQL STABLE;
 
-
+CREATE FUNCTION link_name(link link) RETURNS TEXT AS $$
+  SELECT substring(link.title from 1 for 25)
+$$ LANGUAGE SQL STABLE;
 
 COMMENT ON FUNCTION search_link(TEXT) IS 'Поиск по заголовку и превью ссылки';
 GRANT EXECUTE ON FUNCTION search_link(TEXT) TO anonymous, authorized, admin;
