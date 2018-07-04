@@ -170,7 +170,7 @@ GRANT SELECT ON TABLE person TO anonymous, authorized, admin;
 GRANT UPDATE, DELETE ON TABLE person TO authorized, admin;
 
 CREATE FUNCTION search_link_tag(search_id INTEGER, search TEXT) RETURNS SETOF link AS $$
-  SELECT * from search_link(search) 
+  SELECT DISTINCT * from search_link(search) 
   WHERE id in (select link_id from link_tag where tag_id = search_id)
 $$ LANGUAGE SQL STABLE;
 
