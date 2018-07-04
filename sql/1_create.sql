@@ -104,19 +104,18 @@ CREATE POLICY delete_link_as_authorized ON link FOR DELETE TO authorized
 CREATE INDEX link_fts_idx ON link USING GIN (to_tsvector('russian', title || ' ' || preview));
 
 ----------------------------------------
-CREATE FUNCTION search_link(search TEXT) RETURNS SETOF link AS $$
+CREATE OR REPLACE FUNCTION search_link(search TEXT, cond_person_id INTEGER) RETURNS SETOF link AS $$
   SELECT *
   FROM link
-  WHERE  search = '' or to_tsvector('russian', title || ' ' || COALESCE(preview, '')) @@ plainto_tsquery('russian', search)
+  WHERE  (cond_person_id is null or cond_person_id = person_id) and (search = '' or to_tsvector('russian', title || ' ' || COALESCE(preview, '')) @@ plainto_tsquery('russian', search))
   ORDER BY created_at DESC
 $$ LANGUAGE SQL STABLE;
+COMMENT ON FUNCTION search_link(TEXT, INTEGER) IS 'Поиск по заголовку и превью ссылки';
+GRANT EXECUTE ON FUNCTION search_link(TEXT, INTEGER) TO anonymous, authorized, admin;
 
 CREATE FUNCTION link_name(link link) RETURNS TEXT AS $$
   SELECT substring(link.title from 1 for 25)
 $$ LANGUAGE SQL STABLE;
-
-COMMENT ON FUNCTION search_link(TEXT) IS 'Поиск по заголовку и превью ссылки';
-GRANT EXECUTE ON FUNCTION search_link(TEXT) TO anonymous, authorized, admin;
 
 CREATE TABLE link_tag (
   link_id  INTEGER NOT NULL,
@@ -169,10 +168,12 @@ COMMENT ON COLUMN person.created_at IS 'Время создания физлиц
 GRANT SELECT ON TABLE person TO anonymous, authorized, admin;
 GRANT UPDATE, DELETE ON TABLE person TO authorized, admin;
 
-CREATE FUNCTION search_link_tag(search_id INTEGER, search TEXT) RETURNS SETOF link AS $$
-  SELECT DISTINCT * from search_link(search) 
-  WHERE id in (select link_id from link_tag where tag_id = search_id)
+CREATE OR REPLACE FUNCTION search_link_tag(search TEXT, cond_tag_id INTEGER) RETURNS SETOF link AS $$
+  SELECT DISTINCT * from search_link(search, null) 
+  WHERE id in (select link_id from link_tag where tag_id = cond_tag_id)
 $$ LANGUAGE SQL STABLE;
+
+GRANT EXECUTE ON FUNCTION search_link_tag(TEXT, INTEGER) TO anonymous, authorized, admin;
 
 ----------------------------------------
 CREATE FUNCTION person_full_name(person person) RETURNS TEXT AS $$
